@@ -73,7 +73,7 @@
 
     .header {
       width: 100%;
-      height: 20px;
+      max-height: 40px;
       padding-bottom: 5px;
       display: flex;
 
