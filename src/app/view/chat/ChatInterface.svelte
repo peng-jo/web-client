@@ -23,6 +23,7 @@
   let isConnected = false;
   let isScrollLock = false;
   let searchView: EmojiSearchResultView;
+  let hasEmojiResults = false;
   const emojiSearchQuery = WindowService.emojiSearchQuery;
 
   $: {
@@ -96,7 +97,7 @@
     switch (key) {
       case 'ArrowUp':
         e.preventDefault();
-        if ($emojiSearchQuery) {
+        if ($emojiSearchQuery && hasEmojiResults) {
           searchView?.previous();
         } else {
           message = chatHistories.getPrev();
@@ -104,14 +105,14 @@
         return false;
       case 'ArrowDown':
         e.preventDefault();
-        if ($emojiSearchQuery) {
+        if ($emojiSearchQuery && hasEmojiResults) {
           searchView?.next();
         } else {
           message = chatHistories.getNext();
         }
         return false;
       case 'Enter':
-        if ($emojiSearchQuery) {
+        if ($emojiSearchQuery && hasEmojiResults) {
           e.preventDefault();
           searchView?.selectCurrent();
           return false;
@@ -163,6 +164,7 @@
   {#if $emojiSearchQuery}
     <EmojiSearchResultView
       bind:this={searchView}
+      bind:hasResults={hasEmojiResults}
       query={$emojiSearchQuery}
       on:select={(e) => onEmojiSelect(e.detail)}
     />

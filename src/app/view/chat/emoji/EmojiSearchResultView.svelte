@@ -4,12 +4,15 @@
   import type { CustomEmoji } from '../../../model/emoji/CustomEmoji';
 
   export let query = '';
+  export let hasResults = false;
   const dispatch = createEventDispatcher();
   const emojiHandler = new VegaEmojiHandler();
 
   let filteredEmojis: CustomEmoji[] = [];
   let selectedIndex = 0;
   let itemElements: HTMLElement[] = [];
+
+  $: hasResults = filteredEmojis.length > 0;
 
   $: {
     if (query) {
