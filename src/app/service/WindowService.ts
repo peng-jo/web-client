@@ -10,9 +10,14 @@ class WindowServiceInit {
   #content: Writable<Content | null> = writable(null);
   #modal: Writable<ModalType | null> = writable(null);
   #currentImage: Writable<string | null> = writable(null);
+  #emojiSearchQuery: Writable<string | null> = writable(null);
 
   get activeInterfaceMenu(): Readable<ActiveInterfaceMenu | null> {
     return this.#activeInterfaceMenu;
+  }
+
+  get emojiSearchQuery(): Readable<string | null> {
+    return this.#emojiSearchQuery;
   }
 
   get content(): Readable<Content | null> {
@@ -45,8 +50,17 @@ class WindowServiceInit {
 
   toggleChatInterfaceMenu(menu: ActiveInterfaceMenu) {
     this.#activeInterfaceMenu.update((prev) => {
-      return prev !== menu ? menu : null;
+      const next = prev !== menu ? menu : null;
+      if (next) this.#emojiSearchQuery.set(null);
+      return next;
     });
+  }
+
+  setEmojiSearchQuery(query: string | null) {
+    this.#emojiSearchQuery.set(query);
+    if (query) {
+      this.#activeInterfaceMenu.set(null);
+    }
   }
 
   closeEmojiAttachView() {
@@ -59,6 +73,10 @@ class WindowServiceInit {
     this.#activeInterfaceMenu.update((prev) => {
       return prev !== 'emoji-reaction' ? prev : null;
     });
+  }
+
+  closeEmojiSearch() {
+    this.#emojiSearchQuery.set(null);
   }
 
   get sideBarShow(): Readable<boolean> {

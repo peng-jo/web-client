@@ -25,6 +25,17 @@ export class VegaEmojiHandler {
     }
   }
 
+  async search(query: string): Promise<CustomEmoji[]> {
+    try {
+      const url = `${this.#host}/search?q=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      return json as CustomEmoji[];
+    } catch {
+      return [];
+    }
+  }
+
   async delete(privateKey: string, emojiIdx: number): Promise<boolean> {
     try {
       const url = `${this.#host}/${privateKey}/emoji/${emojiIdx}`;

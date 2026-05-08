@@ -13,6 +13,7 @@
   import { WindowService } from '../../service/WindowService';
   import { ChatReplyService } from '../../service/ChatReplyService';
   import { get } from 'svelte/store';
+  import EmojiSearchResultView from './emoji/EmojiSearchResultView.svelte';
 
   const clipboardManager = new ClipboardManager();
   const chatHistories = new ChatHistoryManager();
@@ -21,6 +22,13 @@
   let message: string = '';
   let isConnected = false;
   let isScrollLock = false;
+  let searchView: EmojiSearchResultView;
+  const emojiSearchQuery = WindowService.emojiSearchQuery;
+
+  $: {
+    const match = message.match(/:([^:\s]{2,})$/);
+    WindowService.setEmojiSearchQuery(match ? match[1] : null);
+  }
 
   const toggleUserList = () => {
     WindowService.toggleChatInterfaceMenu('user');
@@ -88,12 +96,27 @@
     switch (key) {
       case 'ArrowUp':
         e.preventDefault();
-        message = chatHistories.getPrev();
+        if ($emojiSearchQuery) {
+          searchView?.previous();
+        } else {
+          message = chatHistories.getPrev();
+        }
         return false;
       case 'ArrowDown':
         e.preventDefault();
-        message = chatHistories.getNext();
+        if ($emojiSearchQuery) {
+          searchView?.next();
+        } else {
+          message = chatHistories.getNext();
+        }
         return false;
+      case 'Enter':
+        if ($emojiSearchQuery) {
+          e.preventDefault();
+          searchView?.selectCurrent();
+          return false;
+        }
+        return true;
       case 'Escape':
         if (ChatReplyService.isStaged()) {
           ChatReplyService.unstageChat();
@@ -112,6 +135,15 @@
     message += emoji;
   }
 
+  function onEmojiSelect(emojiName: string) {
+    const lastIndex = message.lastIndexOf(':');
+    if (lastIndex !== -1) {
+      message = message.substring(0, lastIndex) + `:${emojiName}:`;
+    }
+    WindowService.closeEmojiSearch();
+    chatPrompt?.focus();
+  }
+
   function onToggleBotClick() {
     toggleBotList();
   }
@@ -128,6 +160,14 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="chat-interface" on:click={(_) => ChatService.setActive(null)}>
+  {#if $emojiSearchQuery}
+    <EmojiSearchResultView
+      bind:this={searchView}
+      query={$emojiSearchQuery}
+      on:select={(e) => onEmojiSelect(e.detail)}
+    />
+  {/if}
+
   <div class="input-sticker">
     <div class="sticker-section">
       <div on:click={toggleUserList}>
