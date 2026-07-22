@@ -28,7 +28,12 @@
 
   $: {
     const match = message.match(/:([^:\s]{2,})$/);
-    WindowService.setEmojiSearchQuery(match ? match[1] : null);
+    const excludeString = '대충::';
+    const exclude = message.startsWith(excludeString);
+
+    if (match && !exclude) {
+      WindowService.setEmojiSearchQuery(match[1]);
+    }
   }
 
   const toggleUserList = () => {
